@@ -1,5 +1,6 @@
 #ifndef S0_H
 #define S0_H
+#define S0_DEBOUNCE 250
 
 #include <avr/io.h>
 
@@ -13,6 +14,7 @@ typedef struct  {
      uint32_t  pcount; 
      uint32_t  last; 
      uint32_t  adc; 
+     uint32_t  changed;
 } Channel_t;
 
 void s0_init( void );

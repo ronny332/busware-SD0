@@ -18,6 +18,8 @@ static void impuls_action( uint8_t ch ) {
      if (ch>3)
 	  return;
 
+     AVR_ENTER_CRITICAL_REGION();
+
      CH[ch].count++;
      CH[ch].pcount++;
 
@@ -35,6 +37,8 @@ static void impuls_action( uint8_t ch ) {
      
      CH[ch].last = now;
      
+     AVR_LEAVE_CRITICAL_REGION();
+     
      leds_value |= _BV( ch );
 }
 
@@ -42,19 +46,37 @@ static void impuls_action( uint8_t ch ) {
 ISR(PCINT1_vect) {
      uint8_t in   = (PINB & 0x1e) >> 1;
      uint8_t diff = (in ^ port_bits) & port_bits;
+     uint8_t ch = 4;
+     uint32_t now = ms_now();
+
+     if ((diff ^ port_bits) & 2)
+         ch = 0;
+
+     else if ((diff ^ port_bits) & 1)
+         ch = 1;
+
+     else if ((diff ^ port_bits) & 4)
+         ch = 2;
+
+     else if ((diff ^ port_bits) & 8)
+         ch = 3;
+
+     // debounce on all kind of changes (high, low) channel wise by S0_DEBOUNCE value (s0.h)
+     if (CH[ch].changed < now - S0_DEBOUNCE) {
+         if ( diff & 2 )
+	     impuls_action( 0 );
      
-     if ( diff & 2 )
-	  impuls_action( 0 );
+         else if ( diff & 1 )
+	     impuls_action( 1 );
      
-     if ( diff & 1 )
-	  impuls_action( 1 );
+         else if ( diff & 4 )
+	     impuls_action( 2 );
      
-     if ( diff & 4 )
-	  impuls_action( 2 );
-     
-     if ( diff & 8 )
-	  impuls_action( 3 );
-     
+         else if ( diff & 8 )
+	     impuls_action( 3 );
+     }
+
+     CH[ch].changed = now;
      port_bits = in;
 }
 
@@ -71,6 +93,7 @@ void s0_init( void ) {
 	  CH[i].avg_cnt = 0;
 	  CH[i].avg_sum = 0;
 	  CH[i].adc     = 1;
+          CH[i].changed = 0;
      }
 
      // Inputs - not pulled!

@@ -248,7 +248,34 @@ static void parse_buffer( void ) {
 	  
 	  break;
 	  
+
+     case 'Y':
+     case 'y':
+
+          /*switch( buffer[0] ) {
+               case 'Y': 
+                    res=1;
+                    break;
+               default:
+                    res=0;
+          }*/
+          res = ( buffer[0] == 'Y');
+          
+	  s0_getChannelData( 0, &ch_data[0], res );
+	  s0_getChannelData( 1, &ch_data[1], res );
+	  s0_getChannelData( 2, &ch_data[2], res );
+	  s0_getChannelData( 3, &ch_data[3], res );
 	  
+	  printf_P( PSTR("%lu %lu %lu %lu\r\n"), 
+		    ch_data[0].pcount, 
+		    ch_data[1].pcount, 
+		    ch_data[2].pcount, 
+		    ch_data[3].pcount 
+	       );
+	  
+	  break;
+
+
      default:
         printf_P( PSTR("?\r\n") );
 
