@@ -1,0 +1,2 @@
+# busware.de SD0 Firmware
+the busware firmware for their **SD0** raspberry pi extension wasn't updated since a long time and lacks a lot of feafures which should be possible with the used Atmega m1284p hardware.
